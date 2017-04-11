@@ -1,4 +1,4 @@
-from json import dumps
+from json import dumps, JSONEncoder
 from random import sample
 
 from IPython.display import Javascript
@@ -64,7 +64,7 @@ var process_nx = function(d3, chart_id, graph, width, height) {
 """
 
 
-def embed_networkx(graph, d3_code=None, width=960, height=600):
+def embed_networkx(graph, d3_code=None, width=960, height=600, json_encoder=JSONEncoder):
     """
     Embeds a networxk into a Jupyter notebook cell with Javascript/D3
 
@@ -79,7 +79,7 @@ def embed_networkx(graph, d3_code=None, width=960, height=600):
     """
 
     d3_code = DEFAULT if d3_code is None else d3_code
-    graph = dumps(node_link_data(graph))
+    graph = dumps(node_link_data(graph), cls=json_encoder)
     chart_id = "".join(sample('abcdefghjkmopqrstuvqxyz', 16))
 
     javascript_vars = "var chart_idx='{}', graphx={}, widthx={}, heightx={};".format(chart_id, graph, width, height)
