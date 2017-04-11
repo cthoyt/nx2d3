@@ -1,3 +1,4 @@
+from string import Template
 from json import dumps, JSONEncoder
 from random import sample
 
@@ -6,13 +7,13 @@ from networkx.readwrite.json_graph import node_link_data
 
 __all__ = ['embed_networkx']
 
-DEFAULT = """
+DEFAULT = Template("""
 var process_nx = function(d3, chart_id, graph, width, height) {
     var color = d3.scale.category20();
 
     var force = d3.layout.force()
-        .charge(-200)
-        .linkDistance(40)
+        .charge(${charge})
+        .linkDistance(${link_distance})
         .size([width, height]);
 
     var svg = d3.select('#' + chart_id).append("svg")
@@ -28,8 +29,8 @@ var process_nx = function(d3, chart_id, graph, width, height) {
         .data(graph.links)
         .enter().append("line")
         .attr("class", "link")
-        .attr("stroke", "#999")
-        .attr("stroke-width", 1.5);
+        .attr("stroke", "${link_stroke_color}")
+        .attr("stroke-width", ${link_stroke_width});
 
     var node = svg.selectAll(".node")
         .data(graph.nodes)
@@ -38,14 +39,15 @@ var process_nx = function(d3, chart_id, graph, width, height) {
         .call(force.drag);
 
     node.append("circle")
-        .attr("r", 6)
+        .attr("r", ${node_radius})
         .style("fill", function(d) {
+            console.log(d, d.color);
             return color(d.color);
         });
 
     node.append("text")
-        .attr("dx", 12)
-        .attr("dy", ".35em")
+        .attr("dx", ${node_label_dx})
+        .attr("dy", "${node_label_dy}")
         .text(function(d) {
             return d.id;
         });
@@ -61,10 +63,20 @@ var process_nx = function(d3, chart_id, graph, width, height) {
         });
     });
 }
-"""
+""")
+
+DEFAULT_VALUES = {
+    'charge': -200,
+    'link_distance': 40,
+    'link_stroke_color': '#999',
+    'link_stroke_width': 1.5,
+    'node_radius': 6,
+    'node_label_dx': 12,
+    'node_label_dy': '.35em',
+}
 
 
-def embed_networkx(graph, d3_code=None, width=960, height=600, json_encoder=JSONEncoder):
+def embed_networkx(graph, d3_code=None, d3_values=None, width=960, height=600, json_encoder=JSONEncoder):
     """
     Embeds a networxk into a Jupyter notebook cell with Javascript/D3
 
@@ -77,8 +89,13 @@ def embed_networkx(graph, d3_code=None, width=960, height=600, json_encoder=JSON
     :param height: the generated d3 svg height
     :return: IPython Javascript Object
     """
+    if d3_code is None:
+        values = DEFAULT_VALUES.copy()
+        values.update(d3_values or {})
+        d3_code = DEFAULT.substitute(values)
+    else:
+        d3_code = d3_code.substitute(d3_values or {})
 
-    d3_code = DEFAULT if d3_code is None else d3_code
     graph = dumps(node_link_data(graph), cls=json_encoder)
     chart_id = "".join(sample('abcdefghjkmopqrstuvqxyz', 16))
 
