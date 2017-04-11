@@ -1,25 +1,23 @@
-# nx2d3
+nx2d3
+=====
 
 Display NetworkX graphs inline in Jupyter notebooks
 
-## Installing
+Installing
+----------
+From the latest code on GitHub with:
 
-For users:
+.. code-block:: sh
 
-`$ pip install git+https://github.com/cthoyt/nx2d3.git`
+    $ python3 -m pip install git+https://github.com/cthoyt/nx2d3.git
 
-For developers:
+Example
+-------
 
-`$ git clone https://github.com/cthoyt/nx2d3.git; pip install -e .`
-
-## Example
-
-```python
-import networkx as nx
-import nx2d3
-G = nx.petersen_graph()
-nx2d3.embed_networkx(G)
-```
+>>> import networkx as nx
+>>> import nx2d3
+>>> G = nx.petersen_graph()
+>>> nx2d3.embed_networkx(G)
 
 **Note:** GitHub will not render custom javascript on https://github.com/cthoyt/nx2d3/blob/master/example.ipynb. 
 Instead, try nbviewer http://nbviewer.jupyter.org/github/cthoyt/nx2d3/blob/master/example.ipynb or viewing the
